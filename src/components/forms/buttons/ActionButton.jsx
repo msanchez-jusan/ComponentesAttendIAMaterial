@@ -10,6 +10,7 @@ export default function ActionButton({
   color = "primary",
   size = "medium",
   expanded = false,
+  type = "button",
   ...props
 }) {
   return (
@@ -27,6 +28,7 @@ export default function ActionButton({
           <FontAwesomeIcon icon={icon} />
         ) : null
       }
+      type={type}
       {...props}
     >
       {label}

@@ -20,7 +20,7 @@ import {
   ExpandLess,
   ExpandMore,
   Phone as PhoneIcon,
-  Logout as LogoutIcon, // Aunque no se usa en el render explícito abajo, lo dejo
+  Logout as LogoutIcon,
   Brightness4 as Brightness4Icon,
   Brightness7 as Brightness7Icon,
 } from "@mui/icons-material";
@@ -29,43 +29,33 @@ import ButtonFactory from "./forms/buttons/ButtonFactory";
 const drawerWidth = 280;
 
 export default function Sidebar({ mode, colorMode }) {
-  // 1. Obtenemos el tema global que viene de App.js (con tu rosa, bordes, etc.)
   const globalTheme = useTheme();
 
-  // 2. Creamos un tema nuevo que MEZCLA tu marca con el modo oscuro
   const sidebarTheme = useMemo(
     () =>
       createTheme({
-        // Heredamos la forma (borderRadius: 12)
         shape: globalTheme.shape,
 
-        // Heredamos la tipografía (por si la cambiaste)
         typography: globalTheme.typography,
 
-        // Heredamos los componentes (por si personalizaste botones, inputs, etc.)
         components: globalTheme.components,
 
         palette: {
-          mode: "dark", // <--- AQUÍ FORZAMOS EL MODO OSCURO
+          mode: "dark",
 
-          // Mantenemos TUS colores de marca
           primary: globalTheme.palette.primary,
           secondary: globalTheme.palette.secondary,
 
-          // Definimos el fondo del sidebar.
-          // Puedes usar un gris oscuro estándar de MUI (#1e1e1e)
-          // o usar tu color secundario '#0f121bff' si quieres que sea muy oscuro.
           background: {
-            paper: "#1e1e1e", // Fondo típico de sidebar oscuro
+            paper: "#1e1e1e",
             default: "#121212",
           },
         },
       }),
-    [globalTheme], // Se recalcula si cambias algo en App.js
+    [globalTheme],
   );
 
   return (
-    // 3. Aplicamos este tema híbrido solo al Sidebar
     <ThemeProvider theme={sidebarTheme}>
       <SidebarContent
         mode={mode}
@@ -76,9 +66,8 @@ export default function Sidebar({ mode, colorMode }) {
   );
 }
 
-// --- Subcomponente con el contenido (igual que antes) ---
 function SidebarContent({ mode, colorMode, drawerWidth }) {
-  const theme = useTheme(); // Este theme ahora es el sidebarTheme (Oscuro + Tu Marca)
+  const theme = useTheme();
   const [openMenus, setOpenMenus] = useState({ dashboard: true });
 
   const handleClick = (menu) => {

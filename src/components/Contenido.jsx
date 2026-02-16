@@ -8,6 +8,13 @@ import {
 import ToggleCard from "./common/ToggleCard";
 import { useState } from "react";
 import CustomCard from "./common/CustomCard";
+import CustomInput from "./forms/Inputs/CustomInput";
+import PasswordInput from "./forms/Inputs/PasswordInput";
+import CustomStepper from "./common/CustomStepper";
+import CustomDatePicker from "./forms/Inputs/CustomDatePicker";
+import CustomSelect from "./forms/Inputs/CustomSelect";
+import CustomModal from "./common/CustomModal";
+
 function Contenido() {
   const [selectedPersona, setSelectedPersona] = useState("professional");
 
@@ -33,6 +40,49 @@ function Contenido() {
       icon: faRobot,
     },
   ];
+  const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
+  const [activeStep, setActiveStep] = useState(0);
+  const steps = [
+    {
+      title: "Crear Agente IA",
+      description:
+        "Define el nombre, la personalidad y el avatar de tu asistente.",
+    },
+    {
+      title: "Diseñar prompt",
+      description:
+        "Escribe las instrucciones base (System Prompt) que guiarán su comportamiento.",
+    },
+    {
+      title: "Base de Conocimiento",
+      description:
+        "Sube archivos PDF, TXT o DOC para que el agente aprenda de tu negocio.",
+    },
+    {
+      title: "Configuración Final",
+      description: "Revisa los permisos y activa el agente.",
+    },
+  ];
+  const roles = [
+    { id: "admin", nombre: "Administrador" },
+    { id: "user", nombre: "Usuario Básico" },
+    { id: "guest", nombre: "Invitado" },
+  ];
+  const handleNext = () => {
+    if (activeStep < steps.length - 1) {
+      setActiveStep((prev) => prev + 1);
+    } else {
+      console.log("¡Formulario Finalizado!");
+    }
+  };
+
+  const handleStepClick = (stepIndex) => {
+    setActiveStep(stepIndex);
+  };
+  const [fecha, setFecha] = useState(null);
+  const [rol, setRol] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="container-fluid py-4">
       <header className="mb-5 border-bottom pb-3 d-flex justify-content-between align-items-center">
@@ -122,9 +172,61 @@ function Contenido() {
             </div>
           </CustomCard>
         </div>
+        <div className="col-12">
+          <CustomCard>
+            <CustomInput
+              title="Nombre"
+              name="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              icon={null}
+              placeholder="Nombre"
+            />
+            <PasswordInput
+              title="Contraseña"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="********"
+            />
+            {/* 1. FECHA SIMPLE */}
+            <CustomDatePicker
+              title="Fecha de Nacimiento"
+              value={fecha}
+              onChange={(newValue) => setFecha(newValue)}
+              error={!fecha}
+            />
+
+            {/* 2. HORA */}
+            <CustomDatePicker
+              title="Hora de entrada"
+              type="time"
+              value={fecha}
+              onChange={(newValue) => setFecha(newValue)}
+            />
+
+            {/* 3. FECHA Y HORA */}
+            <CustomDatePicker
+              title="Cita agendada"
+              type="datetime"
+              value={fecha}
+              onChange={(newValue) => setFecha(newValue)}
+            />
+            <CustomSelect
+              title="Rol de Usuario"
+              items={roles}
+              value={rol}
+              onChange={(e) => setRol(e.target.value)}
+              idKey="id"
+              nameKey="nombre"
+              emptyTitle="Seleccione un rol..."
+            />
+          </CustomCard>
+        </div>
         <div className="col-12 ">
           <CustomCard title="Tarjetas seleccionables">
-            {" "}
             <div className="d-flex flex-row gap-3 flex-wrap">
               {PERSONALITIES.map((persona) => (
                 <ToggleCard
@@ -139,79 +241,67 @@ function Contenido() {
             </div>
           </CustomCard>
         </div>
-        <div className="col-12 ">
-          <div className="row">
-            <div className="col-3">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-              ></CustomCard>
-            </div>
-            <div className="col-6">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-              ></CustomCard>
-            </div>
-            <div className="col-3">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-                footer={
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography variant="caption" color="text.secondary">
-                      Cancela cuando quieras
-                    </Typography>
-                    <ButtonFactory
-                      action="save"
-                      mode="button"
-                      icon={null}
-                      onClick={() => console.log("Guardar")}
-                    />
-                  </Box>
-                }
-              >
-                <ButtonFactory
-                  action="save"
-                  mode="button"
-                  icon={null}
-                  onClick={() => console.log("Guardar")}
-                />
-              </CustomCard>
-            </div>
-          </div>
+        <div className="col-12">
+          <CustomCard title="Modal">
+            <ButtonFactory
+              action="create"
+              mode="button"
+              label="Crear nuevo agente IA"
+              loading={false}
+              onClick={() => setIsOpen(true)}
+            />
+            <CustomModal
+              display={isOpen}
+              closeHandler={() => setIsOpen(false)}
+              title="Titulo del modal"
+              subtitle="Descripción del modal"
+              width="sm"
+              isForm={true}
+              submitHandler={() => console.log("Guardar")}
+              showDeleteButton={true}
+              showCancelButton={true}
+              showSaveButton={true}
+              deleteHandler={() => console.log("Eliminar")}
+              cancelButtonText="Cancelar"
+              saveButtonText="Guardar"
+            >
+              <CustomInput
+                title="Nombre"
+                placeholder="Ingrese el nombre"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <CustomInput
+                title="Email"
+                placeholder="Ingrese el email"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+            </CustomModal>
+          </CustomCard>
         </div>
         <div className="col-12 ">
           <div className="row">
             <div className="col-3">
               <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-              ></CustomCard>
+                title="Flujo de creación"
+                subtitle="Completa los pasos y publica tu agente"
+              >
+                <CustomStepper
+                  steps={steps}
+                  activeStep={activeStep}
+                  handleNext={handleNext}
+                  orientation="vertical"
+                  onStepClick={handleStepClick}
+                />
+              </CustomCard>
             </div>
             <div className="col-6">
               <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-              ></CustomCard>
-            </div>
-            <div className="col-3">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
+                title={steps[activeStep].title}
+                subtitle={steps[activeStep].description}
                 footer={
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography variant="caption" color="text.secondary">
-                      Cancela cuando quieras
-                    </Typography>
+                  <Box display="flex" justifyContent="end" alignItems="center">
                     <ButtonFactory
                       action="save"
                       mode="button"
@@ -220,35 +310,12 @@ function Contenido() {
                     />
                   </Box>
                 }
-              >
-                <ButtonFactory
-                  action="save"
-                  mode="button"
-                  icon={null}
-                  onClick={() => console.log("Guardar")}
-                />
-              </CustomCard>
-            </div>
-          </div>
-        </div>{" "}
-        <div className="col-12 ">
-          <div className="row">
-            <div className="col-3">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-              ></CustomCard>
-            </div>
-            <div className="col-6">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
               ></CustomCard>
             </div>
             <div className="col-3">
               <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
+                title="Preview Agente IA"
+                subtitle="Comprueba el diseño y el comportamiento"
                 footer={
                   <Box
                     display="flex"
@@ -256,60 +323,8 @@ function Contenido() {
                     alignItems="center"
                   >
                     <Typography variant="caption" color="text.secondary">
-                      Cancela cuando quieras
+                      Escribe un mensaje
                     </Typography>
-                    <ButtonFactory
-                      action="save"
-                      mode="button"
-                      icon={null}
-                      onClick={() => console.log("Guardar")}
-                    />
-                  </Box>
-                }
-              >
-                <ButtonFactory
-                  action="save"
-                  mode="button"
-                  icon={null}
-                  onClick={() => console.log("Guardar")}
-                />
-              </CustomCard>
-            </div>
-          </div>
-        </div>{" "}
-        <div className="col-12 ">
-          <div className="row">
-            <div className="col-3">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-              ></CustomCard>
-            </div>
-            <div className="col-6">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-              ></CustomCard>
-            </div>
-            <div className="col-3">
-              <CustomCard
-                title="Tarjeta de información"
-                subtitle="Subtítulo de la tarjeta"
-                footer={
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography variant="caption" color="text.secondary">
-                      Cancela cuando quieras
-                    </Typography>
-                    <ButtonFactory
-                      action="save"
-                      mode="button"
-                      icon={null}
-                      onClick={() => console.log("Guardar")}
-                    />
                   </Box>
                 }
               >

@@ -5,8 +5,9 @@ export default function CustomIconButton({
   icon,
   tooltip,
   onClick,
-  color = "primary",
+  color = "text.primary",
   size = "medium",
+  type = "button",
   disabled = false,
   ...props
 }) {
@@ -26,6 +27,7 @@ export default function CustomIconButton({
           color={color}
           size={size}
           disabled={disabled}
+          type={type}
           {...props}
         >
           <FontAwesomeIcon icon={icon} />

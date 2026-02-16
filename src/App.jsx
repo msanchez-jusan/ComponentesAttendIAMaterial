@@ -6,6 +6,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 
 import Sidebar from "./components/Sidebar";
 import Contenido from "./components/Contenido";
+import LoginPage from "./LoginPage";
 
 function App() {
   const [mode, setMode] = useState("light");
@@ -24,7 +25,7 @@ function App() {
       createTheme({
         palette: {
           mode,
-          primary: { main: "#ff7976" },
+          primary: { main: "#ff7976", contrastText: "#ffffff" },
           secondary: { main: "#0f121bff" },
         },
         shape: {
@@ -48,6 +49,7 @@ function App() {
             <Contenido />
           </main>
         </div>
+        {/* <LoginPage /> */}
       </LocalizationProvider>
     </ThemeProvider>
   );

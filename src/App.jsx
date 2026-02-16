@@ -28,7 +28,7 @@ function App() {
           secondary: { main: "#0f121bff" },
         },
         shape: {
-          borderRadius: 8,
+          borderRadius: 12,
         },
       }),
     [mode],
@@ -42,7 +42,7 @@ function App() {
           <Sidebar mode={mode} colorMode={colorMode} theme={theme} />
 
           <main
-            className="flex-grow-1 d-flex flex-column"
+            className="flex-grow-1 d-flex flex-column p-4"
             style={{ overflowX: "auto" }}
           >
             <Contenido />

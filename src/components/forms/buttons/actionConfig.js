@@ -5,13 +5,14 @@ import {
   faMagnifyingGlass,
   faEye,
   faPlus,
+  faSignOutAlt,
 } from "@fortawesome/free-solid-svg-icons";
 
 export const ACTIONS = {
   edit: {
     label: "Editar",
     icon: faPenToSquare,
-    color: "primary",
+    color: "secondary",
     tooltip: "Editar registro",
     variant: "contained",
   },
@@ -20,7 +21,7 @@ export const ACTIONS = {
     icon: faTrashCan,
     color: "error",
     tooltip: "Eliminar",
-    variant: "contained",
+    variant: "outlined",
   },
   save: {
     label: "Guardar",
@@ -49,5 +50,12 @@ export const ACTIONS = {
     color: "primary",
     tooltip: "Crear nuevo registro",
     variant: "contained",
+  },
+  logout: {
+    label: "Cerrar sesión",
+    icon: faSignOutAlt,
+    color: "error",
+    tooltip: "Cerrar sesión",
+    variant: "outlined",
   },
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Drawer,
   List,
@@ -9,38 +9,76 @@ import {
   Box,
   Typography,
   Avatar,
-  Divider,
-  Button,
+  IconButton,
+  useTheme,
+  ThemeProvider,
+  createTheme,
 } from "@mui/material";
 import {
   Dashboard as DashboardIcon,
-  Settings as SettingsIcon,
   People as PeopleIcon,
   ExpandLess,
   ExpandMore,
   Phone as PhoneIcon,
-  Message as MessageIcon,
-  Logout as LogoutIcon,
+  Logout as LogoutIcon, // Aunque no se usa en el render explícito abajo, lo dejo
+  Brightness4 as Brightness4Icon,
+  Brightness7 as Brightness7Icon,
 } from "@mui/icons-material";
-
-import { IconButton } from "@mui/material";
-import Brightness4Icon from "@mui/icons-material/Brightness4";
-import Brightness7Icon from "@mui/icons-material/Brightness7";
-
-// Colores basados en tu imagen (Estilo Dark Metronic)
-const colors = {
-  bg: "#1e1e2d", // Fondo oscuro principal
-  text: "#92929f", // Texto gris
-  textActive: "#ffffff", // Texto activo blanco
-  primary: "#f1416c", // El rojo/rosa de tu marca
-  activeBg: "rgba(241, 65, 108, 0.1)", // Fondo rojizo suave para el activo
-  hover: "#2b2b40", // Color al pasar el mouse
-};
+import ButtonFactory from "./forms/buttons/ButtonFactory";
 
 const drawerWidth = 280;
 
-export default function Sidebar({ mode, colorMode, theme }) {
-  // Estado para controlar qué menús están abiertos
+export default function Sidebar({ mode, colorMode }) {
+  // 1. Obtenemos el tema global que viene de App.js (con tu rosa, bordes, etc.)
+  const globalTheme = useTheme();
+
+  // 2. Creamos un tema nuevo que MEZCLA tu marca con el modo oscuro
+  const sidebarTheme = useMemo(
+    () =>
+      createTheme({
+        // Heredamos la forma (borderRadius: 12)
+        shape: globalTheme.shape,
+
+        // Heredamos la tipografía (por si la cambiaste)
+        typography: globalTheme.typography,
+
+        // Heredamos los componentes (por si personalizaste botones, inputs, etc.)
+        components: globalTheme.components,
+
+        palette: {
+          mode: "dark", // <--- AQUÍ FORZAMOS EL MODO OSCURO
+
+          // Mantenemos TUS colores de marca
+          primary: globalTheme.palette.primary,
+          secondary: globalTheme.palette.secondary,
+
+          // Definimos el fondo del sidebar.
+          // Puedes usar un gris oscuro estándar de MUI (#1e1e1e)
+          // o usar tu color secundario '#0f121bff' si quieres que sea muy oscuro.
+          background: {
+            paper: "#1e1e1e", // Fondo típico de sidebar oscuro
+            default: "#121212",
+          },
+        },
+      }),
+    [globalTheme], // Se recalcula si cambias algo en App.js
+  );
+
+  return (
+    // 3. Aplicamos este tema híbrido solo al Sidebar
+    <ThemeProvider theme={sidebarTheme}>
+      <SidebarContent
+        mode={mode}
+        colorMode={colorMode}
+        drawerWidth={drawerWidth}
+      />
+    </ThemeProvider>
+  );
+}
+
+// --- Subcomponente con el contenido (igual que antes) ---
+function SidebarContent({ mode, colorMode, drawerWidth }) {
+  const theme = useTheme(); // Este theme ahora es el sidebarTheme (Oscuro + Tu Marca)
   const [openMenus, setOpenMenus] = useState({ dashboard: true });
 
   const handleClick = (menu) => {
@@ -56,54 +94,70 @@ export default function Sidebar({ mode, colorMode, theme }) {
         "& .MuiDrawer-paper": {
           width: drawerWidth,
           boxSizing: "border-box",
-          backgroundColor: colors.bg,
-          color: colors.text,
-          borderRight: "none", // Quitar borde default de MUI
+          backgroundColor: theme.palette.background.paper,
+          color: theme.palette.text.secondary,
+          borderRight: `1px solid ${theme.palette.divider}`,
         },
       }}
     >
-      <Box>
-        <Typography variant="caption" sx={{ mr: 1 }}>
-          {mode === "dark" ? "Dark Mode" : "Light Mode"}
-        </Typography>
-        <IconButton
-          sx={{ ml: 1 }}
-          onClick={colorMode.toggleColorMode}
-          color="inherit"
+      {/* Header con Toggle */}
+      <Box
+        sx={{
+          p: 2,
+          display: "flex",
+          justifyContent: "flex-end",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          variant="caption"
+          sx={{ mr: 1, color: theme.palette.text.disabled }}
         >
-          {theme.palette.mode === "dark" ? (
-            <Brightness7Icon />
-          ) : (
-            <Brightness4Icon />
-          )}
+          {mode === "dark" ? "Modo oscuro" : "Modo claro"}
+        </Typography>
+        <IconButton onClick={colorMode.toggleColorMode} color="inherit">
+          {mode === "dark" ? <Brightness7Icon /> : <Brightness4Icon />}
         </IconButton>
       </Box>
-      {/* 1. LOGO AREA */}
-      <Box sx={{ p: 3, display: "flex", alignItems: "center", gap: 2 }}>
-        {/* Aquí iría tu logo <img> */}
+
+      <Box
+        sx={{
+          px: 3,
+          pb: 3,
+          pt: 1,
+          display: "flex",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
         <Box
           sx={{
             width: 40,
             height: 40,
-            bgcolor: colors.primary,
+            bgcolor: theme.palette.primary.main,
             borderRadius: 2,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            color: "white",
+            color: theme.palette.primary.contrastText,
             fontWeight: "bold",
           }}
         >
           A
         </Box>
-        <Typography variant="h6" sx={{ color: "white", fontWeight: "bold" }}>
+        <Typography
+          variant="h6"
+          sx={{
+            color: theme.palette.text.primary,
+            fontWeight: "bold",
+          }}
+        >
           ATTENDIA
         </Typography>
       </Box>
 
-      {/* 2. MENU ITEMS */}
+      {/* Menu Items */}
       <Box sx={{ overflow: "auto", flex: 1, px: 2 }}>
-        {/* SECCIÓN: OVERVIEW */}
         <Typography
           variant="caption"
           sx={{
@@ -112,25 +166,26 @@ export default function Sidebar({ mode, colorMode, theme }) {
             mb: 1,
             display: "block",
             fontWeight: "bold",
-            opacity: 0.5,
+            color: theme.palette.text.disabled,
           }}
         >
           OVERVIEW
         </Typography>
 
         <List component="nav">
-          {/* Item Padre: Dashboard (Activo) */}
           <ListItemButton
             onClick={() => handleClick("dashboard")}
             sx={{
               borderRadius: 2,
               mb: 0.5,
-              bgcolor: colors.activeBg, // Fondo activo
-              color: colors.primary, // Texto activo
-              "&:hover": { bgcolor: colors.activeBg },
+              bgcolor: theme.palette.action.selected,
+              color: theme.palette.primary.main, // Usará tu rosa #ff7976
+              "&:hover": { bgcolor: theme.palette.action.hover },
             }}
           >
-            <ListItemIcon sx={{ minWidth: 40, color: colors.primary }}>
+            <ListItemIcon
+              sx={{ minWidth: 40, color: theme.palette.primary.main }}
+            >
               <DashboardIcon />
             </ListItemIcon>
             <ListItemText
@@ -140,16 +195,14 @@ export default function Sidebar({ mode, colorMode, theme }) {
             {openMenus.dashboard ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
 
-          {/* Sub-items (Llamadas, Mensajes...) */}
           <Collapse in={openMenus.dashboard} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
-              {/* Renderizamos una línea vertical visual si quieres el efecto árbol */}
               <Box
                 sx={{
                   position: "relative",
                   ml: 3,
                   pl: 2,
-                  borderLeft: `1px solid ${colors.hover}`,
+                  borderLeft: `1px solid ${theme.palette.divider}`,
                 }}
               >
                 {[
@@ -157,35 +210,40 @@ export default function Sidebar({ mode, colorMode, theme }) {
                   "Llamadas",
                   "Mensajes",
                   "Conversaciones",
-                ].map((text) => (
-                  <ListItemButton
-                    key={text}
-                    sx={{
-                      py: 0.5,
-                      borderRadius: 1,
-                      color: text === "Conversaciones" ? "white" : colors.text, // Simulo que Conversaciones está seleccionado
-                      "&:hover": { color: "white" },
-                    }}
-                  >
-                    {/* Bullet point pequeño típico de templates admin */}
-                    <Box
+                ].map((text) => {
+                  const isActive = text === "Conversaciones";
+                  return (
+                    <ListItemButton
+                      key={text}
                       sx={{
-                        width: 4,
-                        height: 4,
-                        borderRadius: "50%",
-                        bgcolor: "currentColor",
-                        mr: 2,
+                        py: 0.5,
+                        borderRadius: 1,
+                        color: isActive
+                          ? theme.palette.text.primary
+                          : theme.palette.text.secondary,
+                        "&:hover": { color: theme.palette.text.primary },
                       }}
-                    />
-                    <ListItemText primary={text} />
-                  </ListItemButton>
-                ))}
+                    >
+                      <Box
+                        sx={{
+                          width: 4,
+                          height: 4,
+                          borderRadius: "50%",
+                          bgcolor: isActive
+                            ? theme.palette.primary.main
+                            : "currentColor",
+                          mr: 2,
+                        }}
+                      />
+                      <ListItemText primary={text} />
+                    </ListItemButton>
+                  );
+                })}
               </Box>
             </List>
           </Collapse>
         </List>
 
-        {/* SECCIÓN: CONFIGURACIÓN */}
         <Typography
           variant="caption"
           sx={{
@@ -194,77 +252,66 @@ export default function Sidebar({ mode, colorMode, theme }) {
             mb: 1,
             display: "block",
             fontWeight: "bold",
-            opacity: 0.5,
+            color: theme.palette.text.disabled,
           }}
         >
           CONFIGURACIÓN
         </Typography>
 
         <List>
-          <ListItemButton
-            sx={{
-              borderRadius: 2,
-              mb: 0.5,
-              "&:hover": { bgcolor: colors.hover, color: "white" },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
-              <PeopleIcon />
-            </ListItemIcon>
-            <ListItemText primary="Agentes IA" />
-            <Box sx={{ opacity: 0.5 }}>›</Box> {/* Flecha simple derecha */}
-          </ListItemButton>
-
-          <ListItemButton
-            sx={{
-              borderRadius: 2,
-              mb: 0.5,
-              "&:hover": { bgcolor: colors.hover, color: "white" },
-            }}
-          >
-            <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
-              <PhoneIcon />
-            </ListItemIcon>
-            <ListItemText primary="Contactos" />
-            <Box sx={{ opacity: 0.5 }}>›</Box>
-          </ListItemButton>
+          {["Agentes IA", "Contactos"].map((text, index) => (
+            <ListItemButton
+              key={text}
+              sx={{
+                borderRadius: 2,
+                mb: 0.5,
+                color: theme.palette.text.secondary,
+                "&:hover": {
+                  bgcolor: theme.palette.action.hover,
+                  color: theme.palette.text.primary,
+                },
+              }}
+            >
+              <ListItemIcon sx={{ minWidth: 40, color: "inherit" }}>
+                {index === 0 ? <PeopleIcon /> : <PhoneIcon />}
+              </ListItemIcon>
+              <ListItemText primary={text} />
+              <Box sx={{ opacity: 0.5 }}>›</Box>
+            </ListItemButton>
+          ))}
         </List>
       </Box>
 
-      {/* 3. FOOTER (USUARIO) */}
-      <Box sx={{ p: 2, borderTop: `1px solid ${colors.hover}` }}>
+      {/* Footer */}
+      <Box sx={{ p: 2, borderTop: `1px solid ${theme.palette.divider}` }}>
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Avatar
             src="/ruta-a-tu-imagen.jpg"
             sx={{ width: 40, height: 40, mr: 2 }}
-            variant="rounded" // Cuadrado redondeado como en la foto
+            variant="rounded"
           />
           <Box>
             <Typography
               variant="subtitle2"
-              sx={{ color: "white", fontWeight: "bold" }}
+              sx={{ color: theme.palette.text.primary, fontWeight: "bold" }}
             >
               Laura Agente
             </Typography>
-            <Typography variant="caption" sx={{ color: colors.text }}>
+            <Typography
+              variant="caption"
+              sx={{ color: theme.palette.text.secondary }}
+            >
               Admin
             </Typography>
           </Box>
         </Box>
-
-        <Button
-          variant="outlined"
-          fullWidth
-          startIcon={<LogoutIcon />}
-          sx={{
-            color: colors.text,
-            borderColor: colors.hover,
-            justifyContent: "flex-start",
-            "&:hover": { borderColor: colors.primary, color: "white" },
-          }}
-        >
-          Logout
-        </Button>
+        <ButtonFactory
+          action="logout"
+          mode="button"
+          label="Cerrar sesión"
+          expanded={true}
+          onClick={() => console.log("Logout")}
+        />
       </Box>
     </Drawer>
   );
